@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import { nanoid } from 'nanoid';
 import styled from 'styled-components';
 
@@ -49,57 +49,54 @@ const AddButton = styled.button`
 }
 `;
 
-class ContactForm extends Component {
-    state = {
-      name: '',
-      number: '',
-    };
-  
-    handleSubmit = (event) => {
-      event.preventDefault();
-      this.props.onAdd({ id: nanoid(), name: this.state.name, number: this.state.number });
-      this.setState({ name: '', number: '' });
-    };
-  
-    handleNameChange = (event) => {
-      this.setState({ name: event.target.value });
-    };
-  
-    handleNumberChange = (event) => {
-      let input = event.target.value;
-      input = input.replace(/\D/g, "").slice(0, 8); 
-      input = input.replace(/(\d{3})(\d{2})(\d{2})/, "$1-$2-$3"); 
-      this.setState({ number: input });
-    };
-  
-    render() {
-      return (
-        <FormContainer onSubmit={this.handleSubmit}>
-          <LabelName>
-            <StyledName>Name:</StyledName>
-            <InputName
-              type="text"
-              value={this.state.name}
-              onChange={this.handleNameChange}
-              required
-              placeholder="Name"
-            />
-          </LabelName>
-          <LabelName>
-            <StyledNumber>Number:</StyledNumber>
-            <InputName
-              type="tel"
-              pattern="[0-9]{3}-[0-9]{2}-[0-9]{2}"
-              placeholder="222-22-22"
-              value={this.state.number}
-              onChange={this.handleNumberChange}
-              required
-            />
-          </LabelName>
-          <AddButton type="submit">Add contact</AddButton>
-        </FormContainer>
-      );
-    }
+const ContactForm = ({ onAdd }) => {
+  const [name, setName] = useState('');
+  const [number, setNumber] = useState('');
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    onAdd({ id: nanoid(), name, number });
+    setName('');
+    setNumber('');
   };
-  
-  export default ContactForm;
+
+  const handleNameChange = (event) => {
+    setName(event.target.value);
+  };
+
+  const handleNumberChange = (event) => {
+    let input = event.target.value;
+    input = input.replace(/\D/g, "").slice(0, 8); 
+    input = input.replace(/(\d{3})(\d{2})(\d{2})/, "$1-$2-$3"); 
+    setNumber(input);
+  };
+
+  return (
+    <FormContainer onSubmit={handleSubmit}>
+      <LabelName>
+        <StyledName>Name:</StyledName>
+        <InputName
+          type="text"
+          value={name}
+          onChange={handleNameChange}
+          required
+          placeholder="Name"
+        />
+      </LabelName>
+      <LabelName>
+        <StyledNumber>Number:</StyledNumber>
+        <InputName
+          type="tel"
+          pattern="[0-9]{3}-[0-9]{2}-[0-9]{2}"
+          placeholder="222-22-22"
+          value={number}
+          onChange={handleNumberChange}
+          required
+        />
+      </LabelName>
+      <AddButton type="submit">Add contact</AddButton>
+    </FormContainer>
+  );
+};
+
+export default ContactForm;

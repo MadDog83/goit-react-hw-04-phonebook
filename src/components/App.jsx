@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import ContactForm from './ContactForm/ContactForm';
 import ContactList from './ContactList/ContactList';
 import Filter from './Filter/Filter';
@@ -12,51 +12,50 @@ const CenteredContainer = styled.div`
   height: 100vh;
 `;
 
-class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
+const App = () => {
+  const [contacts, setContacts] = useState(() => {
+    const savedContacts = localStorage.getItem('contacts');
+    return savedContacts ? JSON.parse(savedContacts) : [];
+  });
+  const [filter, setFilter] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
+
+  const deleteContact = (id) => {
+    setContacts(prevContacts => prevContacts.filter(contact => contact.id !== id));
   };
 
-  deleteContact = (id) => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== id)
-    }));
-  };
-
-  handleAddContact = (newContact) => {
-    const doesExist = this.state.contacts.some(
+  const handleAddContact = (newContact) => {
+    const doesExist = contacts.some(
       contact => contact.name.toLowerCase() === newContact.name.toLowerCase()
     );
 
     if (doesExist) {
       alert(`${newContact.name} is already in contacts.`);
     } else {
-      this.setState(prevState => ({
-        contacts: [newContact, ...prevState.contacts]
-      }));
+      setContacts(prevContacts => [newContact, ...prevContacts]);
     }
   };
 
-  handleFilterChange = (event) => {
-    this.setState({ filter: event.target.value });
+  const handleFilterChange = (event) => {
+    setFilter(event.target.value);
   };
 
-  render() {
-    const filteredContacts = this.state.contacts.filter(contact =>
-      contact.name.toLowerCase().includes(this.state.filter.toLowerCase())
-    );
+  const filteredContacts = contacts.filter(contact =>
+    contact.name.toLowerCase().includes(filter.toLowerCase())
+  );
 
-    return (
-      <CenteredContainer>
-        <h1>Phonebook</h1>
-        <ContactForm onAdd={this.handleAddContact} />
-        <h2>Contacts</h2>
-        <Filter value={this.state.filter} onChange={this.handleFilterChange} />
-        <ContactList contacts={filteredContacts} onDelete={this.deleteContact} />
-      </CenteredContainer>
-    );
-  }
+  return (
+    <CenteredContainer>
+      <h1>Phonebook</h1>
+      <ContactForm onAdd={handleAddContact} />
+      <h2>Contacts</h2>
+      <Filter value={filter} onChange={handleFilterChange} />
+      <ContactList contacts={filteredContacts} onDelete={deleteContact} />
+    </CenteredContainer>
+  );
 };
 
 export default App;
